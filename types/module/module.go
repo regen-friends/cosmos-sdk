@@ -295,7 +295,6 @@ func (m *Manager) BeginBlock(ctx sdk.Context, req abci.RequestBeginBlock) abci.R
 	ctx = ctx.WithEventManager(sdk.NewEventManager())
 
 	for _, moduleName := range m.OrderBeginBlockers {
-		fmt.Printf("this is begin block of types/module %s",m.Modules[moduleName])
 		m.Modules[moduleName].BeginBlock(ctx, req)
 	}
 
