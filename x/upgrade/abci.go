@@ -16,21 +16,19 @@ import (
 // a migration to be executed if needed upon this switch (migration defined in the new binary)
 func BeginBlocker(k Keeper, ctx sdk.Context, _ abci.RequestBeginBlock) {
 	plan, found := k.GetUpgradePlan(ctx)
-	if !found {
-		return
-	}
-	if plan.ShouldExecute(ctx) {
-		if !k.HasHandler(plan.Name) {
-			upgradeMsg := fmt.Sprintf("UPGRADE \"%s\" NEEDED at %s: %s", plan.Name, plan.DueAt(), plan.Info)
-			// We don't have an upgrade handler for this upgrade name, meaning this software is out of date so shutdown
-			ctx.Logger().Error(upgradeMsg)
-			panic(upgradeMsg)
+	if found {
+		if plan.ShouldExecute(ctx) {
+			if !k.HasHandler(plan.Name) {
+				upgradeMsg := fmt.Sprintf("UPGRADE \"%s\" NEEDED at %s: %s", plan.Name, plan.DueAt(), plan.Info)
+				// We don't have an upgrade handler for this upgrade name, meaning this software is out of date so shutdown
+				ctx.Logger().Error(upgradeMsg)
+				panic(upgradeMsg)
+			}
+			// We have an upgrade handler for this upgrade name, so apply the upgrade
+			ctx.Logger().Info(fmt.Sprintf("applying upgrade \"%s\" at %s", plan.Name, plan.DueAt()))
+			ctx = ctx.WithBlockGasMeter(sdk.NewInfiniteGasMeter())
+			k.ApplyUpgrade(ctx, plan)
 		}
-		// We have an upgrade handler for this upgrade name, so apply the upgrade
-		ctx.Logger().Info(fmt.Sprintf("applying upgrade \"%s\" at %s", plan.Name, plan.DueAt()))
-		ctx = ctx.WithBlockGasMeter(sdk.NewInfiniteGasMeter())
-		k.ApplyUpgrade(ctx, plan)
-		return
 	}
 
 	// if we have a pending upgrade, but it is not yet time, make sure we did not
