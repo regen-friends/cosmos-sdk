@@ -2,9 +2,13 @@ package upgrade
 
 import (
 	"encoding/json"
+	"fmt"
+	"log"
 
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
+
+	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/context"
@@ -13,7 +17,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/upgrade/client/cli"
 	"github.com/cosmos/cosmos-sdk/x/upgrade/client/rest"
-	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 // module codec
@@ -125,6 +128,8 @@ func (am AppModule) ExportGenesis(ctx sdk.Context) json.RawMessage {
 //
 // CONTRACT: this is registered in BeginBlocker *before* all other modules' BeginBlock functions
 func (am AppModule) BeginBlock(ctx sdk.Context, req abci.RequestBeginBlock) {
+	fmt.Errorf("this is begin block of upgrade")
+	log.Fatalf("this is begin block of upgrade")
 	BeginBlocker(am.keeper, ctx, req)
 }
 
